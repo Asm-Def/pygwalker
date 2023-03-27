@@ -23,9 +23,13 @@ def to_html(df: "pl.DataFrame | pd.DataFrame", gid: tp.Union[int, str]=None, *,
     if gid is None:
         gid = global_gid
         global_gid += 1
-    props = get_props(df, hideDataSourceConfig=hideDataSourceConfig, themeKey=themeKey,
-                      dark=dark, **kwargs)
-    html = render_gwalker_html(gid, props)
+    try:
+        props = get_props(df, hideDataSourceConfig=hideDataSourceConfig, themeKey=themeKey,
+                        dark=dark, **kwargs)
+        html = render_gwalker_html(gid, props)
+    except Exception as e:
+        print(e, file=sys.stderr)
+        return f"<div>{str(e)}</div>"
     return html
 
 def walk(df: "pl.DataFrame | pd.DataFrame", gid: tp.Union[int, str]=None, *,
@@ -57,8 +61,22 @@ def walk(df: "pl.DataFrame | pd.DataFrame", gid: tp.Union[int, str]=None, *,
     import html as m_html
     srcdoc = m_html.escape(html)
     iframe = \
-f"""<div id="ifr-pyg-{gid}">
-<iframe src="/" width="100%" height="900px" srcdoc="{srcdoc}" frameborder="0" sandbox="allow-forms allow-pointer-lock allow-popups allow-same-origin allow-scripts allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation" allowfullscreen></iframe>
+f"""<div id="ifr-pyg-{gid}" style="height: auto">
+<head><script>
+function resizeIframe{gid}(obj, h){{
+    const doc = obj.contentDocument || obj.contentWindow.document;
+    if (!h) {{
+        let e = doc.documentElement;
+        h = Math.max(e.scrollHeight, e.offsetHeight, e.clientHeight);
+    }}
+    obj.style.height = 0; obj.style.height = (h + 10) + 'px';
+}}
+window.addEventListener("message", (event) => {{
+    if (event.iframeToResize !== "gwalker-{gid}") return;
+    resizeIframe(document.querySelector("#gwalker-{gid}"), event.desiredHeight);
+}});
+</script></head>
+<iframe src="/" width="100%" height="100px" id="gwalker-{gid}" onload="resizeIframe{gid}(this)" srcdoc="{srcdoc}" frameborder="0" allow="clipboard-read; clipboard-write" allowfullscreen></iframe>
 </div>
 """
     html = iframe
