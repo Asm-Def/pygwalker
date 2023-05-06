@@ -33,7 +33,6 @@ export async function loadDataSource(props: IDataSourceProps): Promise<IRow[]> {
                         data.push(...(ev.data.data ?? []));
                     }
                     else if (ev.data.action === 'finishData') {
-                        // console.log("finish data!", data);
                         window.removeEventListener('message', onmessage);
                         resolve(data);
                     }
