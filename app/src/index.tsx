@@ -12,6 +12,7 @@ import type { IStoInfo } from '@kanaries/graphic-walker/dist/utils/save';
 import { loadDataSource } from './dataSource';
 import { IDataSetInfo, IMutField, IRow } from '@kanaries/graphic-walker/dist/interfaces';
 import { setConfig } from './utils/userConfig';
+import { CustomIFrame } from './components/customIFrame';
 
 /** App does not consider props.storeRef */
 const App: React.FC<IAppProps> = (propsIn) => {
@@ -109,10 +110,12 @@ const App: React.FC<IAppProps> = (propsIn) => {
   }, [updateDataSource]);
 
   return (
-    <React.StrictMode>
-      <GraphicWalker {...props} />
-      <Options {...props} />
-    </React.StrictMode>
+    <CustomIFrame>
+      <React.StrictMode>
+        <GraphicWalker {...props} />
+        <Options {...props} />
+      </React.StrictMode>
+    </CustomIFrame>
   );
 }
 
